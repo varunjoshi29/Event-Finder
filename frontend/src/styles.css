@@ -1,0 +1,12 @@
+body {
+  background-image: url("./assets/background.jpg");
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: absolute;
+  font-family: "Roboto", sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}

@@ -1,0 +1,505 @@
+<div
+  class="custom-table-container mx-auto px-2 py-2 table-responsive col-md-8 col-12"
+  *ngIf="eventsData && eventsData._embedded && !eventDetails"
+>
+  <table class="table table-dark table-striped text-center custom-table">
+    <thead>
+      <tr>
+        <th>Data/Time</th>
+        <th>Icon</th>
+        <th>Event</th>
+        <th>Genre</th>
+        <th>Venue</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        *ngFor="
+          let row of getSortedData(eventsData._embedded.events.slice(0, 20))
+        "
+        (click)="onEventClicked(row.id)"
+      >
+        <td>
+          {{ row.dates.start.localDate }} <br />
+          {{ row.dates.start.localTime }}
+        </td>
+        <td>
+          <img
+            [src]="row.images[0].url"
+            height="60px"
+            width="60px"
+            alt="Event icon"
+          />
+        </td>
+        <td>{{ row.name }}</td>
+        <td>{{ row.classifications[0].segment.name }}</td>
+        <td>{{ row._embedded.venues[0].name }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div
+  *ngIf="eventDetails"
+  class="mx-auto container-fluid mb-5 custom-event-detail-card col-md-8 col-11"
+>
+  <div class="container-fluid">
+    <div class="back-btn text-white px-3 py-2">
+      <fa-icon
+        [icon]="backIcon"
+        style="cursor: pointer; font-weight: 300"
+        (click)="
+          eventDetails = null;
+          openHoursExpanded = false;
+          generalRuleExpanded = false;
+          childRuleExpanded = false
+        "
+      >
+      </fa-icon>
+      <span
+        class="text-decoration-underline"
+        (click)="
+          eventDetails = null;
+          openHoursExpanded = false;
+          generalRuleExpanded = false;
+          childRuleExpanded = false
+        "
+        style="cursor: pointer; margin-left: 5px"
+        >Back</span
+      >
+    </div>
+  </div>
+  <div class="container-fluid mt-3">
+    <div class="d-flex align-items-center text-center justify-content-center">
+      <h2 class="text-center mb-5" style="color: white">
+        {{ eventDetails.name }}
+      </h2>
+      <div
+        class="d-flex justify-content-center align-items-center rounded-circle bg-white mx-3"
+        style="height: 35px; width: 35px; margin-top: -45px"
+      >
+        <fa-icon
+          *ngIf="!isFavoriteEvent"
+          (click)="addToFavorites()"
+          [icon]="heartIcon"
+          class="mx-2 fa-lg"
+        ></fa-icon>
+        <fa-icon
+          *ngIf="isFavoriteEvent"
+          (click)="removeFromFavorites()"
+          [icon]="solidHeartIcon"
+          class="mx-2 fa-lg"
+          style="color: red"
+        ></fa-icon>
+      </div>
+    </div>
+
+    <mat-tab-group>
+      <!--TODO-->
+      <mat-tab label="Events">
+        <div class="row">
+          <div class="col-md-6">
+            <div
+              class="d-flex flex-column justify-content-center align-items-center"
+            >
+              <h5
+                *ngIf="eventDetails.dates.start.localDate"
+                class="label mt-5 mb-1"
+              >
+                Date
+              </h5>
+              <p
+                *ngIf="eventDetails.dates.start.localDate"
+                class="event-value text-center"
+              >
+                {{ eventDetails.dates.start.localDate }}
+              </p>
+
+              <h5 *ngIf="eventDetails._embedded.attractions" class="label mb-1">
+                Artist/Team
+              </h5>
+              <p
+                *ngIf="eventDetails._embedded.attractions"
+                class="event-value text-center"
+              >
+                {{ getAttractionsName() }}
+              </p>
+
+              <h5
+                *ngIf="eventDetails._embedded.venues[0].name"
+                class="label mb-1"
+              >
+                Venue
+              </h5>
+              <p
+                *ngIf="eventDetails._embedded.venues[0].name"
+                class="event-value text-center"
+              >
+                {{ eventDetails._embedded.venues[0].name }}
+              </p>
+
+              <h5 *ngIf="eventDetails.classifications" class="label mb-1">
+                Genres
+              </h5>
+              <p
+                *ngIf="eventDetails.classifications"
+                class="event-value text-center"
+              >
+                {{ getGenres() }}
+              </p>
+
+              <h5 *ngIf="eventDetails.priceRanges" class="label mb-1">
+                Price Ranges
+              </h5>
+              <p
+                *ngIf="eventDetails.priceRanges"
+                class="event-value text-center"
+              >
+                {{ eventDetails.priceRanges[0].min }} -
+                {{ eventDetails.priceRanges[0].max }}
+                {{ eventDetails.priceRanges[0].currency }}
+              </p>
+
+              <h5 *ngIf="eventDetails.dates.status.code" class="label mb-1">
+                Ticket Status
+              </h5>
+              <p
+                *ngIf="eventDetails.dates.status.code"
+                class="text-center status-box rounded"
+                [ngStyle]="{
+                  'background-color': ticketStatusObject.backgroundColor,
+                  color: '#fff',
+                  padding: '4px'
+                }"
+              >
+                {{ ticketStatusObject.text }}
+              </p>
+
+              <h5 *ngIf="eventDetails.url" class="label mb-1">
+                Buy Ticket At:
+              </h5>
+              <p *ngIf="eventDetails.url" class="event-value text-center">
+                <a
+                  *ngIf="eventDetails.url"
+                  href="{{ eventDetails.url }}"
+                  class="text-decoration-underline text-navy"
+                  target="_blank"
+                  >Ticketmaster</a
+                >
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div
+              *ngIf="eventDetails.seatmap && eventDetails.seatmap.staticUrl"
+              class="d-flex justify-content-center align-items-center mt-md-5 pt-md-5"
+            >
+              <img
+                [src]="eventDetails.seatmap.staticUrl"
+                alt="{{ eventDetails.name }}"
+                class="img-fluid"
+                id="seat-map"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="d-flex justify-content-center align-items-center event-value mt-3 mb-3"
+        >
+          Share on:
+
+          <a
+            href="https://twitter.com/intent/tweet?text=Check {{
+              eventDetails.name
+            }} on Ticketmaster. {{ eventDetails.url }}"
+            target="_blank"
+          >
+            <fa-icon
+              [icon]="twitterIcon"
+              class="mx-2 fa-2x"
+              style="color: rgb(52, 186, 238)"
+            ></fa-icon>
+          </a>
+          <a
+            href="https://www.facebook.com/sharer/sharer.php?u={{
+              eventDetails.url
+            }}"
+            target="_blank"
+          >
+            <fa-icon
+              [icon]="facebookIcon"
+              class="fa-2x"
+              style="color: rgb(41, 41, 241)"
+            ></fa-icon>
+          </a>
+        </div>
+      </mat-tab>
+      <mat-tab label="Artists/Teams">
+        <ngb-carousel
+          *ngIf="artistsData"
+          [showNavigationArrows]="showArrows"
+          [showNavigationIndicators]="false"
+          [interval]="0"
+        >
+          <ng-template
+            ngbSlide
+            *ngFor="let artist of artistsData; let i = index"
+          >
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">
+                  <div class="row">
+                    <div class="col-md-3">
+                      <img
+                        [src]="artist.imageUrl"
+                        class="d-flex rounded-circle mt-3 img-fluid align-items-center"
+                        style="max-height: 160px; margin: auto"
+                      />
+                      <h4 class="label text-center mt-2">
+                        {{ artist.name }}
+                      </h4>
+                    </div>
+                    <div class="col-md-9">
+                      <div class="row">
+                        <div
+                          class="col-md-4 d-flex flex-column justify-content-center align-items-center"
+                        >
+                          <h4
+                            class="label artists-label text-center mt-md-5 mt-2"
+                          >
+                            Popularity
+                          </h4>
+
+                          <mat-progress-spinner
+                            class="mt-md-3 mt-2"
+                            mode="determinate"
+                            [value]="artist.popularity"
+                            [diameter]="50"
+                            [strokeWidth]="4"
+                            [color]="warnColor"
+                          >
+                          </mat-progress-spinner>
+                          <p
+                            class="text-center text-white"
+                            style="margin-top: -35px"
+                          >
+                            {{ artist.popularity }}
+                          </p>
+                        </div>
+
+                        <div class="col-md-4">
+                          <h4
+                            class="label artists-label text-center mt-md-5 mt-3"
+                          >
+                            Followers
+                          </h4>
+                          <h5 class="text-center mt-3 text-white">
+                            {{ artist.followers }}
+                          </h5>
+                        </div>
+
+                        <div
+                          class="col-md-4 d-flex flex-column justify-content-center align-items-center"
+                        >
+                          <h4
+                            class="label artists-label text-center mt-md-5 mt-4"
+                          >
+                            Spotify Link
+                          </h4>
+                          <a href="{{ artist.spotifyUrl }}" target="_blank">
+                            <fa-icon
+                              [icon]="spotifyIcon"
+                              class="mt-2 fa-3x"
+                              style="color: rgb(46, 169, 46); cursor: pointer"
+                            >
+                            </fa-icon>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-1"></div>
+              </div>
+              <div class="row mb-4">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">
+                  <h6 class="label mt-4 text-center text-sm-start">
+                    Album featuring {{ artist.name }}
+                  </h6>
+                  <div class="row">
+                    <ng-container
+                      *ngFor="let albumCover of artist.albumsCovers"
+                    >
+                      <div class="col-md-4 text-center">
+                        <img
+                          [src]="albumCover"
+                          class="img-fluid album-cover p-md-1 px-5 py-2"
+                          alt="Album cover"
+                        />
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+                <div class="col-md-1"></div>
+              </div>
+            </div>
+          </ng-template>
+        </ngb-carousel>
+        <div
+          *ngIf="!artistsData"
+          class="bg-white rounded-5 p-1 text-danger text-center mx-auto card col-10 no-music"
+          style="margin-top: 150px; margin-bottom: 150px"
+        >
+          No music related artist details to show
+        </div>
+      </mat-tab>
+      <mat-tab label="Venue">
+        <div class="p-md-5 p-4">
+          <div *ngIf="venueDetails" class="row">
+            <div class="col-md-6">
+              <div
+                class="d-flex flex-column justify-content-center align-items-center"
+              >
+                <h5 *ngIf="venueDetails.name" class="label mt-2 mb-1">Name</h5>
+                <p *ngIf="venueDetails.name" class="event-value text-center">
+                  {{ venueDetails.name }}
+                </p>
+
+                <h5 *ngIf="venueDetails.address" class="label mb-1">Address</h5>
+                <p *ngIf="venueDetails.address" class="event-value text-center">
+                  {{ venueDetails.address }}
+                </p>
+
+                <h5 *ngIf="venueDetails.phoneNumberDetail" class="label mb-1">
+                  Phone Number
+                </h5>
+                <p
+                  *ngIf="venueDetails.phoneNumberDetail"
+                  class="event-value text-center"
+                >
+                  {{ venueDetails.phoneNumberDetail }}
+                </p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div
+                class="d-flex flex-column justify-content-center align-items-center"
+              >
+                <div
+                  *ngIf="venueDetails.openHoursDetail"
+                  class="d-flex flex-column justify-content-center align-items-center mb-3"
+                >
+                  <h5 class="label mt-md-2 mb-1">Open Hours</h5>
+                  <div class="event-value text-center">
+                    <div
+                      [style.max-height]="!openHoursExpanded ? '3em' : ''"
+                      [style.overflow]="!openHoursExpanded ? 'hidden' : ''"
+                    >
+                      {{ venueDetails.openHoursDetail }}
+                    </div>
+                    <a
+                      style="color: rgb(89, 195, 237); cursor: pointer"
+                      (click)="openHoursExpanded = !openHoursExpanded"
+                    >
+                      {{ openHoursExpanded ? "Show Less" : "Show More" }}
+                      <fa-icon
+                        style="color: white"
+                        [icon]="openHoursExpanded ? showLessIcon : showMoreIcon"
+                      ></fa-icon>
+                    </a>
+                  </div>
+                </div>
+
+                <div
+                  *ngIf="venueDetails.generalRule"
+                  class="d-flex flex-column justify-content-center align-items-center mb-3"
+                >
+                  <h5 class="label mt-md-2 mb-1">General Rule</h5>
+                  <div class="event-value text-center">
+                    <div
+                      [style.max-height]="!generalRuleExpanded ? '3em' : ''"
+                      [style.overflow]="!generalRuleExpanded ? 'hidden' : ''"
+                    >
+                      {{ venueDetails.generalRule }}
+                    </div>
+                    <a
+                      style="color: rgb(89, 195, 237); cursor: pointer"
+                      (click)="generalRuleExpanded = !generalRuleExpanded"
+                    >
+                      {{ generalRuleExpanded ? "Show Less" : "Show More" }}
+                      <fa-icon
+                        style="color: white"
+                        [icon]="
+                          generalRuleExpanded ? showLessIcon : showMoreIcon
+                        "
+                      ></fa-icon>
+                    </a>
+                  </div>
+                </div>
+
+                <div
+                  *ngIf="venueDetails.childRule"
+                  class="d-flex flex-column justify-content-center align-items-center mb-3"
+                >
+                  <h5 class="label mt-md-2 mb-1">Child Rule</h5>
+                  <div class="event-value text-center">
+                    <div
+                      [style.max-height]="!childRuleExpanded ? '3em' : ''"
+                      [style.overflow]="!childRuleExpanded ? 'hidden' : ''"
+                    >
+                      {{ venueDetails.childRule }}
+                    </div>
+                    <a
+                      style="color: rgb(89, 195, 237); cursor: pointer"
+                      (click)="childRuleExpanded = !childRuleExpanded"
+                    >
+                      {{ childRuleExpanded ? "Show Less" : "Show More" }}
+                      <fa-icon
+                        style="color: white"
+                        [icon]="childRuleExpanded ? showLessIcon : showMoreIcon"
+                      ></fa-icon>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            *ngIf="venueDetails"
+            class="d-flex flex-column justify-content-center align-items-center mt-3"
+          >
+            <button type="button" class="btn btn-danger" (click)="openModal()">
+              Show Venue on Google Map
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>
+
+<div
+  *ngIf="eventsData && !eventsData._embedded"
+  class="bg-white rounded-5 p-1 text-danger my-5 text-center mx-auto card col-md-8 col-11"
+>
+  No results available
+</div>
+
+<ng-template #myModal let-modal>
+  <div class="modal-header">
+    <h1 class="modal-title fs-5">Event Venue</h1>
+  </div>
+  <div class="modal-body card">
+    <google-map [options]="mapOptions" [height]="'25rem'" [width]="'100%'">
+      <map-marker [position]="marker.position"></map-marker>
+    </google-map>
+  </div>
+  <div class="modal-footer d-flex justify-content-start">
+    <button type="button" class="btn btn-dark" (click)="modal.dismiss()">
+      Close
+    </button>
+  </div>
+</ng-template>

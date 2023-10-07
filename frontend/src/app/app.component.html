@@ -1,0 +1,30 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-transparent">
+  <div class="container-fluid">
+    <ul class="navbar-nav ms-auto flex-row flex-lg-row">
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          routerLink="/search"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          >Search</a
+        >
+        <div class="nav-link-indicator" routerLinkActive="active"></div>
+      </li>
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          routerLink="/favorites"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          >Favorites</a
+        >
+        <div class="nav-link-indicator" routerLinkActive="active"></div>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container-fluid mt-5">
+  <router-outlet></router-outlet>
+</div>

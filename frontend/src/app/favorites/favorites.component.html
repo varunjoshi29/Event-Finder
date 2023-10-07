@@ -1,0 +1,51 @@
+<div class="table-responsive col-md-8 col-10 mx-auto">
+  <div
+    *ngIf="!favorites"
+    class="bg-white rounded-5 p-1 text-danger my-5 text-center mx-auto card no-fav"
+    style="margin-top: 50px"
+  >
+    No favourite events to show
+  </div>
+
+  <h5 *ngIf="favorites" class="text-center" style="color: rgb(50, 240, 215)">
+    List of your favorite events
+  </h5>
+  <div class="table-responsive mt-4">
+    <table
+      *ngIf="favorites"
+      class="table table-light table-hover rounded fav-table col-md-8 col-12"
+      style="margin: auto; border-radius: 20px; overflow: hidden"
+    >
+      <thead>
+        <tr>
+          <th class="text-center">#</th>
+          <th class="text-center">Date</th>
+          <th class="text-center">Event</th>
+          <th class="text-center">Category</th>
+          <th class="text-center">Venue</th>
+          <th class="text-center">Favorite</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of favorites; let i = index">
+          <td class="text-center">
+            {{ i + 1 }}
+          </td>
+          <td class="text-center">{{ row.date }}</td>
+          <td class="text-center">{{ row.event }}</td>
+          <td class="text-center">{{ row.category }}</td>
+          <td class="text-center">{{ row.venue }}</td>
+
+          <td class="text-center">
+            <fa-icon
+              style="cursor: pointer"
+              (click)="removeFromFavorites(row.id)"
+              [icon]="trashCan"
+              class="fa-x"
+            ></fa-icon>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

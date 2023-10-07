@@ -1,0 +1,118 @@
+<div class="custom-container card mx-auto pb-5 pt-5 px-3 col-md-5 col-11">
+  <h2
+    class="text-center text-white mb-4"
+    style="font-family: Georgia, 'Times New Roman', Times, serif"
+  >
+    Events Search
+  </h2>
+  <div class="bg-white mb-4" style="height: 0.9px; width: 100%"></div>
+
+  <form
+    class="row g-3"
+    (ngSubmit)="onSubmit($event)"
+    #myForm="ngForm"
+    ngNativeValidate
+  >
+    <div class="col-12">
+      <label for="inputKeyword" class="form-label mb-1"
+        >Keyword <span class="text-danger">*</span></label
+      >
+      <input
+        matInput
+        type="text"
+        class="form-control"
+        id="inputKeyword"
+        required
+        name="keyword"
+        [matAutocomplete]="auto"
+        [(ngModel)]="formData.keyword"
+        [formControl]="keywordControl"
+      />
+
+      <mat-autocomplete
+        [panelWidth]="570"
+        #auto="matAutocomplete"
+        (optionSelected)="onSelected()"
+      >
+        <mat-option *ngIf="isLoading" class="is-loading"
+          ><mat-spinner diameter="20"></mat-spinner
+        ></mat-option>
+        <ng-container *ngIf="!isLoading">
+          <mat-option
+            *ngFor="let option of autocompleteOptions"
+            [value]="option"
+          >
+            {{ option }}
+          </mat-option>
+        </ng-container>
+      </mat-autocomplete>
+    </div>
+
+    <div class="col-md-6">
+      <label for="inputDistance" class="form-label mb-1">Distance</label>
+      <input
+        type="number"
+        value="10"
+        class="form-control"
+        id="inputDistance"
+        name="distance"
+        [(ngModel)]="formData.distance"
+      />
+    </div>
+    <div class="col-md-4">
+      <label for="inputCategory" class="form-label mb-1"
+        >Category <span class="text-danger">*</span>
+      </label>
+      <select
+        id="inputCategory"
+        class="form-select"
+        name="category"
+        [(ngModel)]="formData.category"
+      >
+        <option selected>Default</option>
+        <option>Music</option>
+        <option>Sports</option>
+        <option>Arts & Theatre</option>
+        <option>Film</option>
+        <option>Miscellaneous</option>
+      </select>
+    </div>
+
+    <div class="col-12">
+      <label for="inputLocation" class="form-label mb-1"
+        >Location <span class="text-danger">*</span>
+      </label>
+      <input
+        type="text"
+        class="form-control"
+        id="inputLocation"
+        name="location"
+        required
+        [(ngModel)]="formData.location"
+        [disabled]="formData.autoLocate"
+      />
+    </div>
+
+    <div class="col-12">
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          id="inputAutoLocate"
+          name="autoLocate"
+          [(ngModel)]="formData.autoLocate"
+          (change)="checkLocationText()"
+        />
+        <label class="form-check-label" for="inputLAutoLocate">
+          Auto-detect your location
+        </label>
+      </div>
+    </div>
+    <div class="col-12 d-flex justify-content-center gap-3">
+      <button type="submit" class="btn btn-danger">SUBMIT</button>
+      <button type="button" class="btn btn-primary" (click)="clear()">
+        CLEAR
+      </button>
+    </div>
+  </form>
+</div>
